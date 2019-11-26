@@ -28,7 +28,7 @@ public class WeatherService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_WEATHER_AT = "edu.gvsu.cis.webservice.action.WEATHER_AT";
     // TODO: Update the base url with your own private key.
-    private static final String BASE_URL = "https://api.darksky.net/forecast/";
+    private static final String BASE_URL = "https://api.darksky.net/forecast/69ec42975cff9aba8ddf557597a3a013";
     public static final String BROADCAST_WEATHER = "edu.gvsu.cis.webservice.action.BROADCAST";
     private static final String EXTRA_KEY = "edu.gvsu.cis.webservice.extra.KEY";
     private static final String EXTRA_LAT = "edu.gvsu.cis.webservice.extra.LAT";
@@ -73,7 +73,7 @@ public class WeatherService extends IntentService {
     private void fetchWeatherData(String key, String lat, String lon) {
         try {
             // TODO: Format the url based on the input params
-            URL url = new URL(BASE_URL + key + '/' + lat + ',' + lon);
+            URL url = new URL(BASE_URL + "/" + String.format("%s, %s", lat, lon));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(5000 /* milliseconds */);
             conn.setConnectTimeout(10000 /* milliseconds */);
@@ -93,14 +93,17 @@ public class WeatherService extends IntentService {
                 }
                 JSONObject data = new JSONObject(new String(baos.toByteArray()));
                 JSONObject current = data.getJSONObject("currently");
-                String time = current.getString("time");
-
+                Double temperature = current.getDouble("temperature");
+                String summary = current.getString("summary");
+                String icon = current.getString("icon");
                 // TODO: extract the values you need out of current
 
                 Intent result = new Intent(BROADCAST_WEATHER);
 
                 // TODO: use putExtra to add the extracted values to your broadcast
-
+                result.putExtra("TEMPERATURE", temperature);
+                result.putExtra("SUMMARY", summary);
+                result.putExtra("ICON", icon);
                 result.putExtra("KEY", key);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(result);
             }
